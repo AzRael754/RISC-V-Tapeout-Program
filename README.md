@@ -99,35 +99,27 @@ sudo make install
 
 #### 7. OpenLane (RTL to GDSII Flow)
 OpenLane is an automated RTL to GDSII flow based on several open-source EDA tools.
+Since OpenLane is dockerized by default we will install it directly on our host fedora system,
+but with podman instead of docker since its more secure
 
 ```bash
-# Install Docker
-sudo apt-get update
-sudo apt install -y build-essential python3 python3-venv python3-pip make git
-sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
-curl -fsSL [https://download.docker.com/linux/ubuntu/gpg](https://download.docker.com/linux/ubuntu/gpg) | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] [https://download.docker.com/linux/ubuntu](https://download.docker.com/linux/ubuntu) $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io
+# Install Podman
+sudo dnf update
+sudo dnf install python3 python3-venv python3-pip make git
+sudo dnf ca-certificates curl podman podman-docker
 
-# Add user to the docker group to run docker without sudo
-sudo groupadd docker
-sudo usermod -aG docker $USER
-
-# A reboot is required after this step for the group changes to take effect.
-echo "Please reboot your system now to apply Docker group changes."
-```
-After rebooting:
-```bash
+# podman-docker is a wrapper around podman to make it work like docker
 # Test Docker installation
 docker run hello-world
 
 # Clone OpenLane and build the environment
 cd $HOME
-git clone [https://github.com/The-OpenROAD-Project/OpenLane.git](https://github.com/The-OpenROAD-Project/OpenLane.git)
+git clone --depth 1 https://github.com/The-OpenROAD-Project/OpenLane.git
 cd OpenLane
 make
-
+# There was an error with the Makefile so had to update it with a commit hash
+# Also we need the --privileged flag in docker options to run the container as root,
+# Since podman by default runs it as user
 # Test the OpenLane installation
 make test
 ```
